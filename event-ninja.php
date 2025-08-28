@@ -29,11 +29,22 @@ class EventNinja {
      * Register the event post type
      */
     public function register_post_type() {
+        $labels = array(
+            'name' => 'Events',
+            'singular_name' => 'Event',
+            'menu_name' => 'Events',
+            'add_new' => 'Add New Event',
+            'edit_item' => 'Edit Event',
+        );
+        
         $args = array(
+            'labels' => $labels,
             'public' => true,
             'show_ui' => true,
             'menu_icon' => 'dashicons-calendar-alt',
             'supports' => array('title', 'editor'),
+            'has_archive' => true,
+            'rewrite' => array('slug' => 'events'),
         );
         
         register_post_type('en_event', $args);
