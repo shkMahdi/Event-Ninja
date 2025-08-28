@@ -21,7 +21,22 @@ class EventNinja {
     }
     
     public function init() {
+        $this->register_post_type();
+    }
+
+
+    /**
+     * Register the event post type
+     */
+    public function register_post_type() {
+        $args = array(
+            'public' => true,
+            'show_ui' => true,
+            'menu_icon' => 'dashicons-calendar-alt',
+            'supports' => array('title', 'editor'),
+        );
         
+        register_post_type('en_event', $args);
     }
 }
 
