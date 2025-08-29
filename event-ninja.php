@@ -57,6 +57,7 @@ class EventNinja {
      */
     public function add_hooks() {
         add_action('add_meta_boxes', array($this, 'add_event_meta_boxes'));
+        add_action('save_post', array($this, 'save_event_meta'));
     }
 
     /**
@@ -75,6 +76,8 @@ class EventNinja {
      * Event details meta box
      */
     public function event_details_callback($post) {
+        wp_nonce_field('en_save_event_meta', 'en_event_nonce');
+        
         $event_date = get_post_meta($post->ID, '_en_event_date', true);
         ?>
         <p>
@@ -83,6 +86,22 @@ class EventNinja {
         </p>
         <?php
     }
+
+    public function save_event_meta($post_id) {
+        // Security checks
+        if (!isset($_POST['en_event_nonce']) || !wp_verify_nonce($_POST['en_event_nonce'], 'en_save_event_meta')) {
+            return;
+        }
+        
+        if (!current_user_can('edit_post', $post_id)) {
+            return;
+        }
+        
+        if (isset($_POST['en_event_date'])) {
+            update_post_meta($post_id, '_en_event_date', sanitize_text_field($_POST['en_event_date']));
+        }
+    }
+    
 }
 
 // Initialize the plugin
