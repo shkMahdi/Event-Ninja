@@ -60,6 +60,14 @@ class EventNinja {
     public function add_hooks() {
         add_action('add_meta_boxes', array($this, 'add_event_meta_boxes'));
         add_action('save_post', array($this, 'save_event_meta'));
+
+        //front end hooks
+        add_action('wp_enqueue_scripts', array($this, 'enqueue_scripts'));
+        add_filter('the_content', array($this, 'add_event_details_and_form'));
+        add_action('template_redirect', array($this, 'handle_registration'));
+        
+        // Admin hooks
+        add_action('admin_menu', array($this, 'add_admin_menu'));
     }
 
     /**
@@ -70,24 +78,27 @@ class EventNinja {
             'en_event_details',
             'Event Details',
             array($this, 'event_details_callback'),
-            'en_event'
+            'en_event',
+            'normal',
+            'high'
         );
-    }   
+    } 
 
     /**
      * Event details meta box
      */
     public function event_details_callback($post) {
         wp_nonce_field('en_save_event_meta', 'en_event_nonce');
-    
+        
         $event_date = get_post_meta($post->ID, '_en_event_date', true);
         $event_time = get_post_meta($post->ID, '_en_event_time', true);
         $event_location = get_post_meta($post->ID, '_en_event_location', true);
+        $event_capacity = get_post_meta($post->ID, '_en_event_capacity', true);
         ?>
         <table class="form-table">
             <tr>
-                <th><label for="en_event_date">Event Date</label></th>
-                <td><input type="date" id="en_event_date" name="en_event_date" value="<?php echo esc_attr($event_date); ?>" /></td>
+                <th><label for="en_event_date">Event Date *</label></th>
+                <td><input type="date" id="en_event_date" name="en_event_date" value="<?php echo esc_attr($event_date); ?>" required /></td>
             </tr>
             <tr>
                 <th><label for="en_event_time">Event Time</label></th>
@@ -95,7 +106,14 @@ class EventNinja {
             </tr>
             <tr>
                 <th><label for="en_event_location">Location</label></th>
-                <td><input type="text" id="en_event_location" name="en_event_location" value="<?php echo esc_attr($event_location); ?>" /></td>
+                <td><input type="text" id="en_event_location" name="en_event_location" value="<?php echo esc_attr($event_location); ?>" class="regular-text" /></td>
+            </tr>
+            <tr>
+                <th><label for="en_event_capacity">Event Capacity</label></th>
+                <td>
+                    <input type="number" id="en_event_capacity" name="en_event_capacity" value="<?php echo esc_attr($event_capacity); ?>" min="1" class="small-text" />
+                    <p class="description">Leave empty for unlimited capacity</p>
+                </td>
             </tr>
         </table>
         <?php
@@ -103,6 +121,7 @@ class EventNinja {
 
 
     public function save_event_meta($post_id) {
+        // Security checks
         if (!isset($_POST['en_event_nonce']) || !wp_verify_nonce($_POST['en_event_nonce'], 'en_save_event_meta')) {
             return;
         }
@@ -111,6 +130,11 @@ class EventNinja {
             return;
         }
         
+        if (wp_is_post_autosave($post_id) || wp_is_post_revision($post_id)) {
+            return;
+        }
+        
+        // Save meta fields
         if (isset($_POST['en_event_date'])) {
             update_post_meta($post_id, '_en_event_date', sanitize_text_field($_POST['en_event_date']));
         }
@@ -120,7 +144,137 @@ class EventNinja {
         if (isset($_POST['en_event_location'])) {
             update_post_meta($post_id, '_en_event_location', sanitize_text_field($_POST['en_event_location']));
         }
+        if (isset($_POST['en_event_capacity'])) {
+            $capacity = intval($_POST['en_event_capacity']);
+            update_post_meta($post_id, '_en_event_capacity', $capacity > 0 ? $capacity : '');
+        }
     }
+
+
+        /**
+     * Add event details and registration form to event content
+     */
+    public function add_event_details_and_form($content) {
+        if (is_singular('en_event')) {
+            global $post;
+            
+            // Add event details first
+            $content .= $this->get_event_details($post->ID);
+            
+            $event_date = get_post_meta($post->ID, '_en_event_date', true);
+            
+            // Only show form for future events
+            if ($event_date && strtotime($event_date) >= strtotime('today')) {
+                $content .= $this->get_registration_form($post->ID);
+            } else {
+                $content .= '<div class="en-notice"><p>Registration for this event has closed.</p></div>';
+            }
+        }
+        
+        return $content;
+    }
+    
+    /**
+     * Generate event details HTML
+     */
+    private function get_event_details($event_id) {
+        $event_date = get_post_meta($event_id, '_en_event_date', true);
+        $event_time = get_post_meta($event_id, '_en_event_time', true);
+        $event_location = get_post_meta($event_id, '_en_event_location', true);
+        $event_capacity = get_post_meta($event_id, '_en_event_capacity', true);
+        
+        if (!$event_date && !$event_time && !$event_location && !$event_capacity) {
+            return ''; // No details to show
+        }
+        
+        ob_start();
+        ?>
+        <div class="en-event-meta">
+            <h4>Event Details</h4>
+            
+            <?php if ($event_date): ?>
+                <p><strong>Date:</strong> <?php echo date('F j, Y', strtotime($event_date)); ?></p>
+            <?php endif; ?>
+            
+            <?php if ($event_time): ?>
+                <p><strong>Time:</strong> <?php echo date('g:i A', strtotime($event_time)); ?></p>
+            <?php endif; ?>
+            
+            <?php if ($event_location): ?>
+                <p><strong>Location:</strong> <?php echo esc_html($event_location); ?></p>
+            <?php endif; ?>
+            
+            <?php if ($event_capacity): ?>
+                <?php 
+                $registered_count = $this->get_registration_count($event_id);
+                $available_spots = $event_capacity - $registered_count;
+                ?>
+                <p><strong>Capacity:</strong> <?php echo $event_capacity; ?> people</p>
+                <p><strong>Available Spots:</strong> 
+                    <?php if ($available_spots > 0): ?>
+                        <span style="color: green;"><?php echo $available_spots; ?> remaining</span>
+                    <?php else: ?>
+                        <span style="color: red;">Event is full</span>
+                    <?php endif; ?>
+                </p>
+            <?php endif; ?>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+    
+    /**
+     * Generate registration form HTML
+     */
+    private function get_registration_form($event_id) {
+        // Check capacity first
+        $capacity = get_post_meta($event_id, '_en_event_capacity', true);
+        if ($capacity) {
+            $current_registrations = $this->get_registration_count($event_id);
+            if ($current_registrations >= $capacity) {
+                return '<div class="en-notice en-error"><p>This event is fully booked. No more registrations accepted.</p></div>';
+            }
+        }
+        
+        ob_start();
+        ?>
+        <div class="en-registration-form">
+            <h3>Register for this Event</h3>
+            
+            <?php if (isset($_GET['registered']) && $_GET['registered'] == 'success'): ?>
+                <div class="en-notice en-success">
+                    <p>Registration successful! Thank you for signing up.</p>
+                </div>
+            <?php elseif (isset($_GET['registered']) && $_GET['registered'] == 'error'): ?>
+                <div class="en-notice en-error">
+                    <p>Registration failed. Please try again.</p>
+                </div>
+            <?php endif; ?>
+            
+            <form method="post" action="">
+                <?php wp_nonce_field('en_register_event', 'en_registration_nonce'); ?>
+                <input type="hidden" name="event_id" value="<?php echo esc_attr($event_id); ?>">
+                <input type="hidden" name="action" value="en_register_event">
+                
+                <div class="en-form-row">
+                    <label for="en_user_name">Full Name *</label>
+                    <input type="text" id="en_user_name" name="en_user_name" required>
+                </div>
+                
+                <div class="en-form-row">
+                    <label for="en_user_email">Email Address *</label>
+                    <input type="email" id="en_user_email" name="en_user_email" required>
+                </div>
+                
+                <div class="en-form-row">
+                    <button type="submit" class="en-button">Register Now</button>
+                </div>
+            </form>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+    
 
 
 
@@ -141,6 +295,7 @@ class EventNinja {
         global $wpdb;
         
         $table_name = $wpdb->prefix . 'en_registrations';
+        
         $charset_collate = $wpdb->get_charset_collate();
         
         $sql = "CREATE TABLE $table_name (
