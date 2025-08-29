@@ -18,6 +18,8 @@ class EventNinja {
     
     public function __construct() {
         add_action('init', array($this, 'init'));
+        register_activation_hook(__FILE__, array($this, 'activate'));
+        register_deactivation_hook(__FILE__, array($this, 'deactivate')); 
     }
     
     public function init() {
@@ -100,6 +102,23 @@ class EventNinja {
         if (isset($_POST['en_event_date'])) {
             update_post_meta($post_id, '_en_event_date', sanitize_text_field($_POST['en_event_date']));
         }
+    }
+
+
+
+    /**
+     * Plugin activation
+     */
+    public function activate() {
+        $this->register_post_type();
+        flush_rewrite_rules();
+    }
+
+    /**
+     * Plugin deactivation
+     */
+    public function deactivate() {
+        flush_rewrite_rules();
     }
     
 }
