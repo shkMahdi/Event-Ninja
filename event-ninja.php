@@ -22,6 +22,7 @@ class EventNinja {
     
     public function init() {
         $this->register_post_type();
+        $this->add_hooks();
     }
 
 
