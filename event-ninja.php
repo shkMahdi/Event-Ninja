@@ -141,15 +141,16 @@ class EventNinja {
         global $wpdb;
         
         $table_name = $wpdb->prefix . 'en_registrations';
+        $charset_collate = $wpdb->get_charset_collate();
         
         $sql = "CREATE TABLE $table_name (
-            id int(11) NOT NULL AUTO_INCREMENT,
-            event_id int(11) NOT NULL,
+            id mediumint(9) NOT NULL AUTO_INCREMENT,
+            event_id bigint(20) NOT NULL,
             user_name varchar(100) NOT NULL,
             user_email varchar(100) NOT NULL,
             registration_date datetime DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY (id)
-        );";
+        ) $charset_collate;";
         
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
         dbDelta($sql);
