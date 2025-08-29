@@ -49,6 +49,39 @@ class EventNinja {
         
         register_post_type('en_event', $args);
     }
+    
+
+    /**
+     * Add wordpress hooks
+     */
+    public function add_hooks() {
+        add_action('add_meta_boxes', array($this, 'add_event_meta_boxes'));
+    }
+
+    /**
+     * add meta boxes
+     */
+    public function add_meta_boxes() {
+        add_meta_box(
+            'en_event_details',
+            'Event Details',
+            array($this, 'event_details_callback'),
+            'en_event'
+        );
+    }   
+
+    /**
+     * Event details meta box
+     */
+    public function event_details_callback($post) {
+        $event_date = get_post_meta($post->ID, '_en_event_date', true);
+        ?>
+        <p>
+            <label for="en_event_date">Event Date:</label>
+            <input type="date" id="en_event_date" name="en_event_date" value="<?php echo esc_attr($event_date); ?>" />
+        </p>
+        <?php
+    }
 }
 
 // Initialize the plugin
