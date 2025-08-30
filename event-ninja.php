@@ -151,7 +151,7 @@ class EventNinja {
     }
 
 
-        /**
+    /**
      * Add event details and registration form to event content
      */
     public function add_event_details_and_form($content) {
@@ -273,6 +273,69 @@ class EventNinja {
         </div>
         <?php
         return ob_get_clean();
+    }
+
+
+    /**
+     * Handle registration form submission
+     */
+    public function handle_registration() {
+        if (isset($_POST['action']) && $_POST['action'] == 'en_register_event') {
+            
+            // Security check
+            if (!wp_verify_nonce($_POST['en_registration_nonce'], 'en_register_event')) {
+                return;
+            }
+            
+            $event_id = intval($_POST['event_id']);
+            $user_name = sanitize_text_field($_POST['en_user_name']);
+            $user_email = sanitize_email($_POST['en_user_email']);
+            
+            if ($event_id && $user_name && $user_email) {
+                global $wpdb;
+                $table_name = $wpdb->prefix . 'en_registrations';
+                
+                // Check if already registered
+                $existing = $wpdb->get_var($wpdb->prepare(
+                    "SELECT COUNT(*) FROM $table_name WHERE event_id = %d AND user_email = %s",
+                    $event_id, $user_email
+                ));
+                
+                if ($existing > 0) {
+                    wp_redirect(add_query_arg('registered', 'duplicate', get_permalink($event_id)));
+                    exit;
+                }
+                
+                // Check capacity
+                $capacity = get_post_meta($event_id, '_en_event_capacity', true);
+                if ($capacity) {
+                    $current_registrations = $this->get_registration_count($event_id);
+                    if ($current_registrations >= $capacity) {
+                        wp_redirect(add_query_arg('registered', 'full', get_permalink($event_id)));
+                        exit;
+                    }
+                }
+                
+                // Insert registration
+                $result = $wpdb->insert(
+                    $table_name,
+                    array(
+                        'event_id' => $event_id,
+                        'user_name' => $user_name,
+                        'user_email' => $user_email,
+                        'registration_date' => current_time('mysql'),
+                    ),
+                    array('%d', '%s', '%s', '%s')
+                );
+                
+                if ($result) {
+                    wp_redirect(add_query_arg('registered', 'success', get_permalink($event_id)));
+                } else {
+                    wp_redirect(add_query_arg('registered', 'error', get_permalink($event_id)));
+                }
+                exit;
+            }
+        }
     }
     
 

@@ -1,0 +1,39 @@
+.en-registration-form {
+    background: #f9f9f9;
+    padding: 20px;
+    border: 1px solid #ddd;
+    margin-top: 30px;
+}
+
+.en-registration-form h3 {
+    margin-top: 0;
+    color: #333;
+}
+
+.en-registration-form input[type="text"],
+.en-registration-form input[type="email"] {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+}
+
+.en-registration-form button {
+    background: #0073aa;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+}
+
+.en-event-meta {
+    background: #f8f9fa;
+    padding: 15px;
+    margin: 20px 0;
+    border: 1px solid #dee2e6;
+}
+
+.en-event-meta h4 {
+    margin-top: 0;
+    color: #333;
+}
