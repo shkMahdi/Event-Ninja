@@ -158,6 +158,99 @@ class EventNinja {
 
 
     /**
+     * Get registration count for an event
+     */
+    private function get_registration_count($event_id) {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'en_registrations';
+        
+        $count = $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(*) FROM $table_name WHERE event_id = %d",
+            $event_id
+        ));
+        
+        return intval($count);
+    }
+
+
+    /**
+     * Add admin menu for registrations
+     */
+    public function add_admin_menu() {
+        add_submenu_page(
+            'edit.php?post_type=en_event',
+            'Event Registrations',
+            'Registrations',
+            'manage_options',
+            'en-registrations',
+            array($this, 'admin_registrations_page')
+        );
+    }
+    
+    /**
+     * Admin registrations page
+     */
+    public function admin_registrations_page() {
+        global $wpdb;
+        
+        $table_name = $wpdb->prefix . 'en_registrations';
+        
+        // Get all registrations with event titles
+        $registrations = $wpdb->get_results(
+            "SELECT r.*, p.post_title as event_title 
+             FROM $table_name r 
+             LEFT JOIN {$wpdb->posts} p ON r.event_id = p.ID 
+             ORDER BY r.registration_date DESC"
+        );
+        
+        ?>
+        <div class="wrap">
+            <h1>Event Registrations</h1>
+            
+            <?php if (empty($registrations)): ?>
+                <p>No registrations found.</p>
+            <?php else: ?>
+                <table class="wp-list-table widefat fixed striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Event</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Registration Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($registrations as $registration): ?>
+                            <tr>
+                                <td><?php echo esc_html($registration->id); ?></td>
+                                <td>
+                                    <strong><?php echo esc_html($registration->event_title); ?></strong><br>
+                                    <small>Event ID: <?php echo esc_html($registration->event_id); ?></small>
+                                </td>
+                                <td><?php echo esc_html($registration->user_name); ?></td>
+                                <td><?php echo esc_html($registration->user_email); ?></td>
+                                <td><?php echo esc_html(date('F j, Y g:i A', strtotime($registration->registration_date))); ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+                
+                <p><strong>Total Registrations:</strong> <?php echo count($registrations); ?></p>
+            <?php endif; ?>
+        </div>
+        <?php
+    }
+    
+    /**
+     * Enqueue scripts and styles
+     */
+    public function enqueue_scripts() {
+        wp_enqueue_style('en-style', EN_PLUGIN_URL . 'style.css', array(), EN_VERSION);
+    }
+
+
+    /**
      * Add event details and registration form to event content
      */
     public function add_event_details_and_form($content) {
@@ -344,8 +437,6 @@ class EventNinja {
         }
     }
     
-
-
 
     /**
      * Plugin activation
