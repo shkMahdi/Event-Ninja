@@ -3,7 +3,7 @@
  * Plugin Name: EventNinja
  * Description: Event management plugin for WordPress
  * Version: 1.0.0
- * Author: Sheikh Mahdi Mesbah
+ * Author: Shekh Mahdi Mesbah
  */
 
 // Prevent direct access
