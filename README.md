@@ -1,20 +1,27 @@
 # EventNinja 🥷
 
-A WordPress plugin for event management (Work in Progress).
+A WordPress plugin for event management.
 
-## Current Features
+## Features
 - Custom post type for events
-- Basic event date field
+- Event details (date, time, location, capacity)
 - Admin interface for creating events
-
-## Planned Features
 - User registration for events
-- Event details (time, location, capacity)
 - Registration management
+- Frontend registration forms
 
 ## Installation
 1. Upload to `/wp-content/plugins/`
 2. Activate the plugin
 
+## 📁 File Structure
+
+```
+event-ninja/
+├── event-ninja.php     # Main plugin file
+├── style.css          # Frontend styles
+└── README.md          # Documentation
+```
+
 ## Version
-0.1.0 - Initial development
+1.0.0

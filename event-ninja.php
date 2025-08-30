@@ -33,7 +33,6 @@ class EventNinja {
         $this->add_hooks();
     }
 
-
     /**
      * Register the event post type
      */
@@ -44,6 +43,8 @@ class EventNinja {
             'menu_name' => 'Events',
             'add_new' => 'Add New Event',
             'edit_item' => 'Edit Event',
+            'view_item' => 'View Event',
+            'all_items' => 'All Events',
         );
         
         $args = array(
@@ -51,7 +52,7 @@ class EventNinja {
             'public' => true,
             'show_ui' => true,
             'menu_icon' => 'dashicons-calendar-alt',
-            'supports' => array('title', 'editor'),
+            'supports' => array('title', 'editor', 'thumbnail'),
             'has_archive' => true,
             'rewrite' => array('slug' => 'events'),
         );
@@ -64,7 +65,7 @@ class EventNinja {
      * Add wordpress hooks
      */
     public function add_hooks() {
-        add_action('add_meta_boxes', array($this, 'add_event_meta_boxes'));
+        add_action('add_meta_boxes', array($this, 'add_meta_boxes'));
         add_action('save_post', array($this, 'save_event_meta'));
 
         //front end hooks
