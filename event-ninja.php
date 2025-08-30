@@ -482,3 +482,19 @@ class EventNinja {
 
 // Initialize the plugin
 new EventNinja();
+
+
+// Admin notice for successful activation
+add_action('admin_notices', function() {
+    if (get_transient('en_activated')) {
+        echo '<div class="notice notice-success is-dismissible">';
+        echo '<p><strong>🥷 EventNinja activated!</strong> Ready to manage events stealthily and efficiently.</p>';
+        echo '</div>';
+        delete_transient('en_activated');
+    }
+});
+
+// Set activation notice
+register_activation_hook(__FILE__, function() {
+    set_transient('en_activated', true, 60);
+});
