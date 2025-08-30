@@ -2,38 +2,137 @@
     background: #f9f9f9;
     padding: 20px;
     border: 1px solid #ddd;
+    border-radius: 5px;
     margin-top: 30px;
+    max-width: 500px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .en-registration-form h3 {
     margin-top: 0;
     color: #333;
+    border-bottom: 2px solid #0073aa;
+    padding-bottom: 10px;
 }
 
-.en-registration-form input[type="text"],
-.en-registration-form input[type="email"] {
+.en-form-row {
+    margin-bottom: 15px;
+}
+
+.en-form-row label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #333;
+}
+
+.en-form-row input[type="text"],
+.en-form-row input[type="email"] {
     width: 100%;
-    padding: 8px;
-    margin-top: 5px;
+    padding: 8px 12px;
     border: 1px solid #ccc;
+    border-radius: 3px;
+    font-size: 14px;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease;
 }
 
-.en-registration-form button {
-    background: #0073aa;
+.en-form-row input[type="text"]:focus,
+.en-form-row input[type="email"]:focus {
+    border-color: #0073aa;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 115, 170, 0.3);
+}
+
+.en-button {
+    background: linear-gradient(45deg, #0073aa, #005a87);
     color: white;
     padding: 10px 20px;
     border: none;
+    border-radius: 3px;
     cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    transition: all 0.3s ease;
 }
 
+.en-button:hover {
+    background: linear-gradient(45deg, #005a87, #004466);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.en-notice {
+    padding: 10px 15px;
+    border-radius: 3px;
+    margin-bottom: 20px;
+    border-left: 4px solid;
+}
+
+.en-notice.en-success {
+    background: #d4edda;
+    color: #155724;
+    border-color: #28a745;
+}
+
+.en-notice.en-error {
+    background: #f8d7da;
+    color: #721c24;
+    border-color: #dc3545;
+}
+
+.en-notice p {
+    margin: 0;
+}
+
+/* Event meta display */
 .en-event-meta {
-    background: #f8f9fa;
-    padding: 15px;
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    padding: 20px;
+    border-radius: 8px;
     margin: 20px 0;
     border: 1px solid #dee2e6;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 .en-event-meta h4 {
     margin-top: 0;
     color: #333;
+    font-size: 18px;
+    border-bottom: 2px solid #0073aa;
+    padding-bottom: 8px;
+}
+
+.en-event-meta p {
+    margin: 8px 0;
+    color: #555;
+    font-size: 14px;
+}
+
+.en-event-meta strong {
+    color: #333;
+    font-weight: 600;
+}
+
+/* Responsive design */
+@media (max-width: 600px) {
+    .en-registration-form {
+        margin: 20px 0;
+        padding: 15px;
+    }
+    
+    .en-form-row input[type="text"],
+    .en-form-row input[type="email"] {
+        font-size: 16px; /* Prevents zoom on mobile */
+    }
+    
+    .en-event-meta {
+        margin: 15px 0;
+        padding: 15px;
+    }
+}
+
+/* Clean professional styling */
+.en-registration-form {
+    position: relative;
 }
