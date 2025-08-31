@@ -18,9 +18,9 @@ A WordPress plugin for event management.
 
 ```
 event-ninja/
-├── event-ninja.php     # Main plugin file
-├── style.css          # Frontend styles
-└── README.md          # Documentation
+├── event-ninja.php    
+├── style.css          
+└── README.md
 ```
 
 ## Version
