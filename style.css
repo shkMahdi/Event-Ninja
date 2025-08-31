@@ -85,7 +85,7 @@
     margin: 0;
 }
 
-/* Event meta display */
+/* event meta display */
 .en-event-meta {
     background: linear-gradient(135deg, #f8f9fa, #e9ecef);
     padding: 20px;
@@ -114,7 +114,7 @@
     font-weight: 600;
 }
 
-/* Responsive design */
+/* responsive*/
 @media (max-width: 600px) {
     .en-registration-form {
         margin: 20px 0;
@@ -132,7 +132,7 @@
     }
 }
 
-/* Clean professional styling */
+/* cleanstyling */
 .en-registration-form {
     position: relative;
 }
